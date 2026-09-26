@@ -13,8 +13,8 @@ class Reports:
     def __init__(self, client: "FlexreportClient"):
         self._client = client
 
-    def available(self, event_types: list[str] | None = None) -> Any:
-        return self._client._json("POST", "/list-available-reports", json={"event_types": event_types}, timeout=60)
+    def available(self, report_date: str, event_types: list[str] | None = None) -> Any:
+        return self._client._json("POST", "/list-available-reports", json={"event_types": event_types, "report_date": report_date}, timeout=60)
 
     def get(self, symbols: list[str], *, max_wait: float = 900, poll_every: float = 3.0, progress: bool = True) -> dict:
         if not symbols:
