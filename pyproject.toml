@@ -7,8 +7,15 @@ name = "flexreportfinance"
 version = "0.1.0"
 description = "A Python client for Flexreport Finance's REST API, dedicated to the streaming of real-time stock updates and full-research reports."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Curt Beck", email = "curt@flexreportfinapi.com" }]
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.28.0",
     "tqdm>=4.70",
 ]
+
+[project.urls]
+Repository = "https://github.com/cbecks1212/flexreport-python-client"
+Documentation = "https://app.flexreportfinapi.com/api-docs"
