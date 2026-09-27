@@ -87,4 +87,64 @@ for symbol, report in report_data["rendered"].items():
     print(f"{report['result']['headline']} -> saved to {file_path}")
 ```
 
+## Using your own PDF template
+
+A saved template puts your research in your own format (masthead, colours, layout) and is applied automatically to every PDF the API renders for you. Each account has one template. Templates are HTML, and `template_type` is one of:
+
+- `"bespoke"`: your design replaces the standard report layout.
+- `"add_on"`: your design restyles one section of the standard layout. `anchor` is required and names the section, e.g. `"technical"`, `"financials"` or `"ownership"`.
+
+Drafting and saving each run as a background task on the server. The client polls until the task finishes (up to `max_wait` seconds, 15 minutes by default) and returns `{"task_id", "status", "result"}`. `status` is `"SUCCESS"`, `"FAILURE"`, or `"TIMEOUT"` if `max_wait` ran out first.
+
+### 1. Draft and preview
+
+Drafting renders several treatments of your template as preview images and stores nothing. Drafts expire after 24 hours.
+
+```python
+from flexreportfinance import FlexreportClient
+
+with open("my_template.html") as f:
+    template = f.read()
+
+with FlexreportClient("username", "password") as client:
+    draft = client.reports.draft_template(template, "bespoke")
+
+result = draft["result"]
+print("draft id:", result["draft_id"])
+for variant in result["variants"]:
+    print(variant["variant_id"], variant["name"], "-", variant["rationale"])
+    for url in variant["preview_urls"]:
+        print("   ", url)
+```
+
+### 2. Save the variant you picked
+
+Passing `draft_id` and `variant_id` saves exactly the treatment you previewed. Saving replaces any template already on the account.
+
+```python
+with FlexreportClient("username", "password") as client:
+    saved = client.reports.save_template(
+        template, "bespoke", draft_id="<draft id>", variant_id="<variant id>"
+    )
+    print(saved["status"], saved["result"])
+```
+
+To save without previewing, leave out `draft_id` and `variant_id`.
+
+### Viewing, changing and deleting
+
+```python
+with FlexreportClient("username", "password") as client:
+    print(client.reports.get_template())
+
+    # Change only the fields you pass; the rest keep their saved values.
+    client.reports.update_template(template_type="add_on", anchor="financials")
+
+    # With no arguments, recompiles the saved template as stored.
+    client.reports.update_template()
+
+    # Go back to the standard layouts.
+    client.reports.delete_template()
+```
+
 The client logs in on the first authenticated call and logs in again if the token expires.
