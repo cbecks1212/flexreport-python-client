@@ -118,17 +118,15 @@ for variant in result["variants"]:
 
 ### 2. Save the variant you picked
 
-Passing `draft_id` and `variant_id` saves exactly the treatment you previewed. Saving replaces any template already on the account.
+Passing `draft_id` and `variant_id` saves exactly the treatment you previewed; the request, `template_type` and `anchor` come from the draft, so you don't pass them again. Saving replaces any template already on the account.
 
 ```python
 with FlexreportClient("username", "password") as client:
-    saved = client.reports.save_template(
-        template, "bespoke", draft_id="<draft id>", variant_id="<variant id>"
-    )
+    saved = client.reports.save_template(draft_id="<draft id>", variant_id="<variant id>")
     print(saved["status"], saved["result"])
 ```
 
-To save without previewing, leave out `draft_id` and `variant_id`.
+To save without previewing, pass `template` and `template_type` (and `anchor` for an `add_on`) instead of `draft_id` and `variant_id`.
 
 ### Viewing, changing and deleting
 
