@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flexreportfinance"
-version = "0.2.1"
-description = "A Python client for Flexreport Finance's REST API, dedicated to the streaming of real-time stock updates and full-research reports."
+version = "0.3.0"
+description = "Python client for the Flexreport Finance REST API: stream real-time stock updates and download research reports as PDFs, in the default layout or your own branded template."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

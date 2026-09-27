@@ -1,10 +1,12 @@
+import time
 from typing import Any
 
 import httpx
+from tqdm.auto import tqdm
 
 from .catalog import Catalog
 from .events import Events
-from .reports import Reports
+from .reports import TERMINAL, Reports
 
 BASE_URL = "https://flexreportfinapi.com"
 
@@ -47,6 +49,22 @@ class FlexreportClient:
         resp = self._http.request(method, url, **kwargs)
         resp.raise_for_status()
         return resp.json()
+
+    def _wait_for_task(self, task_id: str, desc: str, max_wait: float, poll_every: float, progress: bool) -> dict:
+        deadline = time.monotonic() + max_wait
+        with tqdm(total=1, desc=desc, unit="task", disable=not progress) as pbar:
+            while time.monotonic() < deadline:
+                body = self._json("GET", "/task-status", params={"task_id": task_id})
+                status = body.get("status")
+                if status in TERMINAL:
+                    pbar.update(1)
+                    return {"task_id": task_id, "status": status, "result": body.get("result")}
+                pbar.set_postfix_str(status or "")
+                time.sleep(poll_every)
+
+        if progress:
+            tqdm.write(f"Timed out waiting on task {task_id}")
+        return {"task_id": task_id, "status": "TIMEOUT", "result": None}
 
     def close(self) -> None:
         self._http.close()
