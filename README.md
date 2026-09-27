@@ -89,7 +89,7 @@ for symbol, report in report_data["rendered"].items():
 
 ## Using your own PDF template
 
-A saved template puts your research in your own format (masthead, colours, layout) and is applied automatically to every PDF the API renders for you. Each account has one template. Templates are HTML, and `template_type` is one of:
+A saved template puts your research in your own format (masthead, colours, layout) and is applied automatically to every PDF the API renders for you. Each account has one template. You describe the template you want in plain English, and `template_type` is one of:
 
 - `"bespoke"`: your design replaces the standard report layout.
 - `"add_on"`: your design restyles one section of the standard layout. `anchor` is required and names the section, e.g. `"technical"`, `"financials"` or `"ownership"`.
@@ -98,13 +98,12 @@ Drafting and saving each run as a background task on the server. The client poll
 
 ### 1. Draft and preview
 
-Drafting renders several treatments of your template as preview images and stores nothing. Drafts expire after 24 hours.
+Drafting turns your request into several treatments, renders each one as preview images, and stores nothing. Drafts expire after 24 hours.
 
 ```python
 from flexreportfinance import FlexreportClient
 
-with open("my_template.html") as f:
-    template = f.read()
+template = "I'd like a modern, sleek equity research template."
 
 with FlexreportClient("username", "password") as client:
     draft = client.reports.draft_template(template, "bespoke")
@@ -119,17 +118,15 @@ for variant in result["variants"]:
 
 ### 2. Save the variant you picked
 
-Passing `draft_id` and `variant_id` saves exactly the treatment you previewed. Saving replaces any template already on the account.
+Passing `draft_id` and `variant_id` saves exactly the treatment you previewed; the request, `template_type` and `anchor` come from the draft, so you don't pass them again. Saving replaces any template already on the account.
 
 ```python
 with FlexreportClient("username", "password") as client:
-    saved = client.reports.save_template(
-        template, "bespoke", draft_id="<draft id>", variant_id="<variant id>"
-    )
+    saved = client.reports.save_template(draft_id="<draft id>", variant_id="<variant id>")
     print(saved["status"], saved["result"])
 ```
 
-To save without previewing, leave out `draft_id` and `variant_id`.
+To save without previewing, pass `template` and `template_type` (and `anchor` for an `add_on`) instead of `draft_id` and `variant_id`.
 
 ### Viewing, changing and deleting
 
