@@ -89,7 +89,7 @@ for symbol, report in report_data["rendered"].items():
 
 ## Using your own PDF template
 
-A saved template puts your research in your own format (masthead, colours, layout) and is applied automatically to every PDF the API renders for you. Each account has one template. Templates are HTML, and `template_type` is one of:
+A saved template puts your research in your own format (masthead, colours, layout) and is applied automatically to every PDF the API renders for you. Each account has one template. You describe the template you want in plain English, and `template_type` is one of:
 
 - `"bespoke"`: your design replaces the standard report layout.
 - `"add_on"`: your design restyles one section of the standard layout. `anchor` is required and names the section, e.g. `"technical"`, `"financials"` or `"ownership"`.
@@ -98,13 +98,12 @@ Drafting and saving each run as a background task on the server. The client poll
 
 ### 1. Draft and preview
 
-Drafting renders several treatments of your template as preview images and stores nothing. Drafts expire after 24 hours.
+Drafting turns your request into several treatments, renders each one as preview images, and stores nothing. Drafts expire after 24 hours.
 
 ```python
 from flexreportfinance import FlexreportClient
 
-with open("my_template.html") as f:
-    template = f.read()
+template = "I'd like a modern, sleek equity research template."
 
 with FlexreportClient("username", "password") as client:
     draft = client.reports.draft_template(template, "bespoke")

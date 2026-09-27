@@ -56,7 +56,7 @@ class Reports:
         return {"cached": cached, "rendered": rendered, "missing": missing, "failed": failed}
 
     def draft_template(self, template: str, template_type: str, *, template_format: str = "html", anchor: str | None = None, max_wait: float = 900, poll_every: float = 3.0, progress: bool = True) -> dict:
-        """Render previews of adaptations of an html template without saving anything.
+        """Render previews of templates proposed from a plain-English request, without saving anything.
 
         The result carries the draft_id and per-variant preview URLs; pass the draft_id
         and the chosen variant_id to save_template() to store exactly what was previewed.
