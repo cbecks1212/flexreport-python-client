@@ -1,12 +1,43 @@
 # Flexreport Finance
 
-Python client for the Flexreport Finance REST API. A username and password are required to use the client. If you do not have those, please create a free account at https://app.flexreportfinapi.com/register-api. For more information, please visit https://app.flexreportfinapi.com/ and https://app.flexreportfinapi.com/api-docs.
+Python client for the Flexreport Finance REST API. A username and password are required to use the client. If you do not have those, you can create a free account from Python (see below) or at https://app.flexreportfinapi.com/register-api. For more information, please visit https://app.flexreportfinapi.com/ and https://app.flexreportfinapi.com/api-docs.
 
 ## Quick Install
 
 ```bash
 pip install flexreportfinance
 ```
+
+## Creating an account
+
+You can sign up without leaving your notebook. Your email is your username.
+
+```python
+from getpass import getpass
+import flexreportfinance as frf
+
+print(frf.register("you@example.com", getpass("Password: ")))
+```
+
+You'll get an email with a link to confirm your account. Click it before using the client; logins are rejected until the account is confirmed.
+
+If you'd rather sign up in the browser, the form at https://app.flexreportfinapi.com/register-api does the same thing.
+
+## Resetting your password
+
+Request a reset and you'll get an email with a link. The link looks like `https://app.flexreportfinapi.com/reset-password?token=<token>`. Copy the token from it and pass it to `reset_password()`:
+
+```python
+from getpass import getpass
+import flexreportfinance as frf
+
+frf.request_reset_password("you@example.com")
+
+# after the email arrives
+frf.reset_password("<token>", getpass("New password: "))
+```
+
+The token expires, so don't sit on it. Alternatively, just click the link in the email and set a new password on the website.
 
 ## Quick example of real-time streaming
 
