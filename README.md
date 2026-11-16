@@ -97,12 +97,19 @@ with FlexreportClient("username", "password") as client:
 
 ### Finding endpoints and parameter values
 
-`client.catalog.list_data_endpoints()` returns every supported path with a one-sentence description of what it returns:
+`client.catalog.list_data_endpoints()` returns every supported path with a one-sentence `description` of what it returns and `sample_parameters` you can pass straight to `get_data()`:
 
 ```python
-for endpoint, description in client.catalog.list_data_endpoints().items():
-    print(f"{endpoint}: {description}")
+endpoints = client.catalog.list_data_endpoints()
+for endpoint, info in endpoints.items():
+    print(f"{endpoint}: {info['description']}")
+    print(f"    e.g. {info['sample_parameters']}")
+
+# Try one out with its sample parameters
+history = client.data.get_data("/earnings-history", endpoints["/earnings-history"]["sample_parameters"])
 ```
+
+The one exception is `/ir-content`: its sample `url` is a placeholder for a `document_url` returned by `/ir-document`.
 
 `client.catalog.data_endpoint_parameters()` fetches the valid values for a parameter from one of the `/list-*` lookup endpoints, such as countries, market-cap categories, financial line items or intraday frequencies. Pass any parameters the lookup takes as keyword arguments:
 
