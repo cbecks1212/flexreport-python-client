@@ -5,6 +5,7 @@ import httpx
 from tqdm.auto import tqdm
 
 from .catalog import Catalog
+from .data import Data
 from .events import Events
 from .reports import TERMINAL, Reports
 
@@ -39,6 +40,7 @@ class FlexreportClient:
         self.catalog = Catalog(self)
         self.reports = Reports(self)
         self.events = Events(self)
+        self.data = Data(self)
 
     def _fetch_token(self) -> str:
         resp = self._http.post("/token", data={"username": self._username, "password": self._password}, auth=None)

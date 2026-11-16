@@ -16,6 +16,13 @@ dependencies = [
     "tqdm>=4.70",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
 [project.urls]
 Repository = "https://github.com/cbecks1212/flexreport-python-client"
 Documentation = "https://app.flexreportfinapi.com/python-client"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
