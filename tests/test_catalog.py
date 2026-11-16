@@ -2,13 +2,27 @@ from urllib.parse import parse_qs
 
 import pytest
 
-from flexreportfinance.catalog import DATA_ENDPOINT_DESCRIPTIONS, LOOKUP_ENDPOINTS
-from flexreportfinance.data import ENDPOINT_METHOD_MAPPER
+from flexreportfinance.catalog import DATA_ENDPOINT_DESCRIPTIONS, ENDPOINT_METHOD_MAPPER, LOOKUP_ENDPOINTS
 
 
-def test_every_endpoint_has_a_description():
+def test_every_endpoint_has_a_description_and_sample():
     assert set(DATA_ENDPOINT_DESCRIPTIONS) == set(ENDPOINT_METHOD_MAPPER)
-    assert all(d.endswith(".") and d.count(". ") == 0 for d in DATA_ENDPOINT_DESCRIPTIONS.values())
+    for entry in DATA_ENDPOINT_DESCRIPTIONS.values():
+        assert set(entry) == {"description", "sample_parameters"}
+        assert entry["description"].endswith(".") and entry["description"].count(". ") == 0
+        assert isinstance(entry["sample_parameters"], dict)
+
+
+@pytest.mark.parametrize("endpoint", sorted(DATA_ENDPOINT_DESCRIPTIONS))
+def test_sample_parameters_work_with_get_data(api, endpoint):
+    sample = DATA_ENDPOINT_DESCRIPTIONS[endpoint]["sample_parameters"]
+    api.data.get_data(endpoint, sample, wait=False)
+    assert api.requests[-1].url.path == endpoint
+
+
+def test_endpoints_lists_mapper(api):
+    assert api.catalog.endpoints() == sorted(ENDPOINT_METHOD_MAPPER)
+    assert not hasattr(api.data, "endpoints")
 
 
 def test_list_data_endpoints(api):

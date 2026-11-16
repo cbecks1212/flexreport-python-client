@@ -5,7 +5,8 @@ import httpx
 import pytest
 
 from flexreportfinance import FlexreportClient
-from flexreportfinance.data import ENDPOINT_METHOD_MAPPER, Data
+from flexreportfinance.catalog import ENDPOINT_METHOD_MAPPER
+from flexreportfinance.data import Data
 
 
 def test_client_exposes_data(api):
@@ -93,10 +94,6 @@ def test_http_error_propagates():
     client._http = httpx.Client(base_url="https://api.test", transport=httpx.MockTransport(handler), auth=client._http.auth)
     with pytest.raises(httpx.HTTPStatusError):
         client.data.get_data("/earnings-history", {"symbol": "AAPL"})
-
-
-def test_endpoints_lists_mapper():
-    assert Data.endpoints() == sorted(ENDPOINT_METHOD_MAPPER)
 
 
 def test_trace_data_serializes_keys(api):
