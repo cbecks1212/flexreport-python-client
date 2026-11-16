@@ -1,6 +1,8 @@
+import os
 import time
 from typing import TYPE_CHECKING, Any
 
+import httpx
 from tqdm.auto import tqdm
 
 if TYPE_CHECKING:
@@ -54,6 +56,48 @@ class Reports:
                 failed.update({t: {"status": "TIMEOUT", "task_id": tid} for t, tid in pending.items()})
 
         return {"cached": cached, "rendered": rendered, "missing": missing, "failed": failed}
+
+    def download(self, symbols: list[str], file_directory: str, *, skip_stale: bool = False) -> list[str]:
+        """Download the latest cached PDF report for each symbol to file_directory/SYMBOL.pdf.
+
+        A stale report predates the company's latest event; it is still downloaded unless
+        skip_stale=True. Returns the paths of the PDFs saved.
+        """
+        results = self.get(symbols)
+        cached_results = results.get("cached")
+        if not cached_results:
+            raise ValueError("NO REPORTS TO DOWNLOAD")
+
+        os.makedirs(file_directory, exist_ok=True)
+        saved = []
+        for result in cached_results:
+            symbol = result.get("symbol")
+            stale = result.get("stale")
+            if stale and skip_stale:
+                print(f"REPORT FOR {symbol} IS STALE. SKIPPING.")
+                continue
+
+            path = os.path.join(file_directory, f"{symbol}.pdf")
+            try:
+                # The presigned S3 URL needs no auth, so this deliberately bypasses the API client.
+                with httpx.stream("GET", result.get("url"), follow_redirects=True) as response:
+                    if response.status_code != 200:
+                        print(f"ERROR DOWNLOADING {symbol}'S REPORT - HTTP {response.status_code}")
+                        continue
+                    with open(path, "wb") as f:
+                        for chunk in response.iter_bytes(chunk_size=8192):
+                            f.write(chunk)
+            except Exception as e:
+                if os.path.exists(path):
+                    os.remove(path)  # don't leave a truncated PDF behind
+                print(f"ERROR DOWNLOADING {symbol}'S REPORT - {e}")
+                continue
+
+            saved.append(path)
+            note = f" (STALE, GENERATED {result.get('generated_at')})" if stale else ""
+            print(f"PDF DOWNLOADED {symbol}'S REPORT TO {path}{note}")
+
+        return saved
 
     def draft_template(self, template: str, template_type: str, *, template_format: str = "html", anchor: str | None = None, max_wait: float = 900, poll_every: float = 3.0, progress: bool = True) -> dict:
         """Render previews of templates proposed from a plain-English request, without saving anything.
